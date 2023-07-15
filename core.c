@@ -17,8 +17,9 @@ int batch_handle(int sum, TASK_ENTRY handle_cb, void *data);
 
 void * task_logic(void * data)
 {
+	int n = *(int *)data;
 	while (1) {
-		printf("%s %d: %d\n", __func__, __LINE__, *(int *)data);
+		printf("%s %d: %d\n", __func__, __LINE__, n);
 		sleep(10);
 	}
 }
