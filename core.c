@@ -35,7 +35,7 @@ void * task_logic(void * data)
 {
 	int n = *(int *)data;
 	while (1) {
-		hp_printf("%d\n", n);
+		hp_printf("handle data phtread %d\n", n);
 		sleep(10);
 	}
 }
@@ -60,7 +60,7 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;
 	long start = get_ms();
-	for (i = 0; i <= sum; i++) {
+	for (i = 0; i < sum; i++) {
 		ret = task_create(&patch_obj[i], cb, (void *)&i);
 
 		if (ret != 0) {
@@ -68,7 +68,8 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 		}
 	}
 	long end = get_ms();
-	hp_printf("create phtread time : %ld ms, start: %ld, end: %ld\n", (end - start), start, end);
+	hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
+		sum, (end - start), start, end);
 	return ret;
 }
 
