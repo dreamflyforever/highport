@@ -10,6 +10,7 @@ char *pchPath;
 FILE * g_fp;
 #define g_size 1024 * 1024 * 10
 char g_buf[g_size];
+char tmpbuf[256];
 #if 1
 Tensor *ptensorInput;
 Session *pSession;
@@ -30,7 +31,7 @@ int session_init(char * path)
 	hp_printf("%s\n", pchPath);
 	// 创建session
 	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
-	std::shared_ptr<Interpreter> net = net_copy;
+	net = net_copy;
 	ScheduleConfig config;
 	config.type  = MNN_FORWARD_AUTO;
 	pSession = net->createSession(config);
@@ -104,9 +105,7 @@ int picture_process(const char *path)
     // 还是需要通过deviceid输入。此外，用这种方式填充数据需要我们自行处理NCHW或者NHWC的数据格式
     // 本文这里，已经将NHWC转成了NCHW了，即 pvData
 //    std::shared_ptr<MNN::CV::ImageProcess> pretreat_data_ = nullptr;
-	hp_printf("\n");
     auto nchwTensor = new Tensor(ptensorInput, Tensor::CAFFE);
-	hp_printf("\n");
     ::memcpy(nchwTensor->host<float>(), pvData, nPlaneSize * 3 * sizeof(float));
     ptensorInput->copyFromHostTensor(nchwTensor);
     delete nchwTensor;
@@ -149,7 +148,8 @@ int picture_process(const char *path)
 #endif
 	hp_printf("%s %d %f", path, tempValues[0].first, tempValues[0].second);
 
-	snprintf(g_buf, g_size, "%s %d %f", path, tempValues[0].first, tempValues[0].second);
+	snprintf(tmpbuf, 256, "%s %d\n", path, tempValues[0].first);
+	strcat(g_buf, tmpbuf );
 
     }
 #if 0
