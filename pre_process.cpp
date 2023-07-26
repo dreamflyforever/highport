@@ -141,11 +141,14 @@ int picture_process(const char *path)
         // 排序, 打印
         std::sort(tempValues.begin(), tempValues.end(),
                   [](std::pair<int, float> a, std::pair<int, float> b) { return a.second > b.second; });
-
+#if 0
         int length = size > 10 ? 10 : size;
         for (int i = 0; i < length; ++i) {
             MNN_PRINT("%d, %f\n", tempValues[i].first, tempValues[i].second);
         }
+#endif
+	hp_printf("%s %d %f", path, tempValues[0].first, tempValues[0].second);
+
 	snprintf(g_buf, g_size, "%s %d %f", path, tempValues[0].first, tempValues[0].second);
 
     }

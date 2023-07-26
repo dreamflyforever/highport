@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #define FILE_NUM_MAX 5000
+#define FILE_SIZE_MAX 5000
 #include <opencv2/opencv.hpp>
 
 char file_table[FILE_NUM_MAX][256];
@@ -83,7 +84,7 @@ int set_table(char * path)
 		}
 		//printf("d_name: %s\n", ptr->d_name);
 		//memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
-		sprintf(file_table[i], "%s/%s", path, ptr->d_name);
+		snprintf(file_table[i], FILE_SIZE_MAX, "%s/%s", path, ptr->d_name);
 		i++;
 	}
 	fn = i;
@@ -130,17 +131,21 @@ char tmpbuf[256];
 FILE *g_fp;
 int main(int argc, char *argv[])
 {
+	int flag = 0;
     long end, start, inf_sum = 0;
     long g_start = get_ms();
-	if (argc != 3) {
-		hp_printf("usage : ./main model dir_picture\n");
+	if (argc != 4) {
+		hp_printf("usage : ./main model dir_picture save\n");
 		return 0;
 	}
     start = g_start;
-	g_fp = fopen("./result.txt", "w");
-	if (g_fp == NULL) {
-		perror("fopen error\n");
-		assert(0);	
+    	if (strcmp("save", argv[3]) == 0) {
+		flag = 1;
+		g_fp = fopen("./result.txt", "w");
+		if (g_fp == NULL) {
+			perror("fopen error\n");
+			assert(0);	
+		}
 	}
     // const char *pchPath = "/home/pi/MNN/build/best_pref_607.mnn";
     //const char *pchPath = "/home/pi/MNN/build/s607.mnn";
@@ -222,7 +227,7 @@ int main(int argc, char *argv[])
     delete nchwTensor;
 
 	end = get_ms();
-	hp_printf("process picture time : %ld ms\n", (end - start)); 
+	//hp_printf("process picture time : %ld ms\n", (end - start)); 
 	start = end;
     // 获取输出Tensor
 	long inf_start = get_ms();
@@ -255,15 +260,19 @@ int main(int argc, char *argv[])
         // 排序, 打印
         std::sort(tempValues.begin(), tempValues.end(),
                   [](std::pair<int, float> a, std::pair<int, float> b) { return a.second > b.second; });
-
+#if 0
         int length = size > 10 ? 10 : size;
         for (int i = 0; i < length; ++i) {
             MNN_PRINT("%d, %f\n", tempValues[i].first, tempValues[i].second);
         }
-
+#endif
 	// sprintf(tmpbuf, "%s %d %f\n", file_table[iter], tempValues[0].first, tempValues[0].second);
-    sprintf(tmpbuf, "%s %d\n", file_table[iter], tempValues[0].first);
-	strcat(file_buf, tmpbuf );
+	if (flag == 0) {
+    		printf("%s %d\n", file_table[iter], tempValues[0].first);
+	} else {
+    		snprintf(tmpbuf, 256, "%s %d\n", file_table[iter], tempValues[0].first);
+		strcat(file_buf, tmpbuf );
+	}
     }
     // 释放我们创建的数据内存,这个不是tensor里的
     if (NULL != pvData)
@@ -274,12 +283,14 @@ int main(int argc, char *argv[])
     // std::cout << "hello world " << std::endl;
 
 	end = get_ms();
-	hp_printf("inference & post process time : %ld ms\n", (end - start)); 
+	//hp_printf("inference & post process time : %ld ms\n", (end - start)); 
 	inf_sum += (end - inf_start);
 }
 
-	fputs(file_buf, g_fp);
-	fclose(g_fp);
+	if (flag ==1 ) {
+		fputs(file_buf, g_fp);
+		fclose(g_fp);
+	}
     long g_end = get_ms();
     hp_printf("all process time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 		 (g_end - g_start), g_start, g_end);
