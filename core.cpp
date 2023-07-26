@@ -19,7 +19,7 @@
 #endif
 
 typedef void * (*TASK_ENTRY) (void *p_arg);
-#define BATCH 10
+#define BATCH 100
 typedef struct HADNLE {
        pthread_t ct;
        TASK_ENTRY cb;
@@ -31,6 +31,7 @@ int task_create(HANDLE *task_obj, TASK_ENTRY handle_cb, void *data);
 int batch_handle(int sum, TASK_ENTRY handle_cb, void *data);
 void core_set(int cpu_core);
 
+int file_add;
 /*get microsecond*/
 long get_ms();
 long g_start;
@@ -44,9 +45,9 @@ void * task_logic(void * data)
 #if 1
 	//core_set(n%3);
 	do {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 			long start = get_ms();
-			picture_process("/media/mclab207/Datas/yc/ESFair2023/TrainingSet/G6/NV/0032069.jpg");
+			picture_process(file_table[file_add++]);
 			long end = get_ms();
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
 				(end - start), start, end, n);
@@ -76,6 +77,8 @@ int main(int argc, char *argv[])
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 		BATCH, (g_end - g_start), g_start, g_end);
+	fputs(g_buf, g_fp);
+	fclose(g_fp);
 error:
 	return ret;
 }

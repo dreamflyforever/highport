@@ -1,11 +1,14 @@
 #include <iostream>
 #include <MNN/Interpreter.hpp>
-
+#include <stdio.h>
+#include <cstdio>
 using namespace MNN;
 
 #include <opencv2/opencv.hpp>
 //const char *pchPath = "/home/pi/MNN/build/best_pref.mnn";
 char *pchPath;
+FILE * g_fp;
+char g_buf[1024 * 1024 * 10];
 #if 1
 Tensor *ptensorInput;
 Session *pSession;
@@ -18,9 +21,14 @@ int session_init(char * path)
 	 * 我们需要通过net创建session1、session2等会话，然后再给session里送入数据，
 	 * 最后通过net->runSession(session)执行推理
 	 */
+	g_fp = fopen("result.txt", "w");
+	if (NULL == g_fp) {
+		perror("error open file\n");
+	}
 	pchPath = path;
 	// 创建session
-	std::shared_ptr<Interpreter> net(Interpreter::createFromFile(pchPath));
+	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
+	std::shared_ptr<Interpreter> net = net_copy;
 	ScheduleConfig config;
 	config.type  = MNN_FORWARD_AUTO;
 	pSession = net->createSession(config);
@@ -132,6 +140,7 @@ int picture_process(const char *path)
         for (int i = 0; i < length; ++i) {
             MNN_PRINT("%d, %f\n", tempValues[i].first, tempValues[i].second);
         }
+	sprintf(g_buf, "%s %d %f", path, tempValues[0].first, tempValues[0].second);
 
     }
 #if 0
