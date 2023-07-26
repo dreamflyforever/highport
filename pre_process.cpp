@@ -3,12 +3,13 @@
 #include <stdio.h>
 #include <cstdio>
 using namespace MNN;
-
+#include <pre_process.hpp>
 #include <opencv2/opencv.hpp>
 //const char *pchPath = "/home/pi/MNN/build/best_pref.mnn";
 char *pchPath;
 FILE * g_fp;
-char g_buf[1024 * 1024 * 10];
+#define g_size 1024 * 1024 * 10
+char g_buf[g_size];
 #if 1
 Tensor *ptensorInput;
 Session *pSession;
@@ -26,6 +27,7 @@ int session_init(char * path)
 		perror("error open file\n");
 	}
 	pchPath = path;
+	hp_printf("%s\n", pchPath);
 	// 创建session
 	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
 	std::shared_ptr<Interpreter> net = net_copy;
@@ -35,6 +37,8 @@ int session_init(char * path)
 	// 获取输入Tensor
 	// getSessionInput 用于获取单个输入tensor
 	ptensorInput = net->getSessionInput(pSession, NULL);
+	if (net == NULL || ptensorInput == NULL)
+		hp_printf(">>>>>>>>>>> error\n");
 	std::vector<int> vctInputDims = ptensorInput->shape();
 	printf("输入Tensor的维度为： ");
 	for (size_t i = 0; i < vctInputDims.size(); ++i)
@@ -85,8 +89,8 @@ int picture_process(const char *path)
     cv::split(OnesImage, rgbChannels);
     nChannels.push_back(rgbChannels); //  NHWC  转NCHW
     int size = 1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float);
-    char pvData[size];
-    //char pvData[100000] = {0};
+    //char pvData[size];
+    char *pvData = (char *) malloc(size);
     int nPlaneSize = MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH;
     for (int c = 0; c < 3; ++c)
     {
@@ -100,7 +104,9 @@ int picture_process(const char *path)
     // 还是需要通过deviceid输入。此外，用这种方式填充数据需要我们自行处理NCHW或者NHWC的数据格式
     // 本文这里，已经将NHWC转成了NCHW了，即 pvData
 //    std::shared_ptr<MNN::CV::ImageProcess> pretreat_data_ = nullptr;
+	hp_printf("\n");
     auto nchwTensor = new Tensor(ptensorInput, Tensor::CAFFE);
+	hp_printf("\n");
     ::memcpy(nchwTensor->host<float>(), pvData, nPlaneSize * 3 * sizeof(float));
     ptensorInput->copyFromHostTensor(nchwTensor);
     delete nchwTensor;
@@ -140,7 +146,7 @@ int picture_process(const char *path)
         for (int i = 0; i < length; ++i) {
             MNN_PRINT("%d, %f\n", tempValues[i].first, tempValues[i].second);
         }
-	sprintf(g_buf, "%s %d %f", path, tempValues[0].first, tempValues[0].second);
+	snprintf(g_buf, g_size, "%s %d %f", path, tempValues[0].first, tempValues[0].second);
 
     }
 #if 0

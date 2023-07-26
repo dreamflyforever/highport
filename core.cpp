@@ -7,17 +7,6 @@
 #include <pre_process.hpp>
 #include <sched.h>
 
-#define DEBUG 1
-
-#if DEBUG
-#define hp_printf(format, ...) \
-       {printf("[%s : %s : %d] ", \
-       __FILE__, __func__, __LINE__); \
-       printf(format, ##__VA_ARGS__);}
-#else
-#define hp_printf(format, ...)
-#endif
-
 typedef void * (*TASK_ENTRY) (void *p_arg);
 #define BATCH 100
 typedef struct HADNLE {
@@ -47,6 +36,7 @@ void * task_logic(void * data)
 	do {
 		for (int i = 0; i < 1; i++) {
 			long start = get_ms();
+			hp_printf("%s\n", file_table[file_add]);
 			picture_process(file_table[file_add++]);
 			long end = get_ms();
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
