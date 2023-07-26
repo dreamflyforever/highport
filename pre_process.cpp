@@ -10,7 +10,7 @@ char *pchPath;
 Tensor *ptensorInput;
 Session *pSession;
 std::shared_ptr<Interpreter> net;//(Interpreter::createFromFile(pchPath));
-int session_init()
+int session_init(char * path)
 {
 	/*interpreter 解释器，是模型数据的持有者，我称之为net
 	 * session 会话，是推理数据的持有者，session通过interpreter创建，多个session可以公用一个interpreter
@@ -18,10 +18,9 @@ int session_init()
 	 * 我们需要通过net创建session1、session2等会话，然后再给session里送入数据，
 	 * 最后通过net->runSession(session)执行推理
 	 */
-
+	pchPath = path;
 	// 创建session
-	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
-	net = net_copy;
+	std::shared_ptr<Interpreter> net(Interpreter::createFromFile(pchPath));
 	ScheduleConfig config;
 	config.type  = MNN_FORWARD_AUTO;
 	pSession = net->createSession(config);

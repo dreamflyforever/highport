@@ -68,12 +68,10 @@ int main(int argc, char *argv[])
 	}
 	//HANDLE obj;
         g_start = get_ms();
-	pchPath = argv[1];
-	hp_printf("%s\n", pchPath);
 	pthread_mutex_init(&mtx, NULL);
 	set_table(argv[2]);
 	//CPU_ZERO(&g_cpuset); 
-	session_init();
+	session_init(argv[1]);
 	ret = batch_handle(BATCH, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
