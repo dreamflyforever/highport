@@ -17,8 +17,9 @@ int set_table(const char * path)
 	while((ptr = readdir(dir)) != NULL) {
 		if(strcmp(".",ptr->d_name)!=0 && strcmp("..", ptr->d_name)
 			&& strcmp(" ", ptr->d_name)!= 0) {
-			printf("d_name: %s\n", ptr->d_name);
-			memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
+			sprintf(file_table[i], "%s/%s", path, ptr->d_name);
+			printf("d_name: %s\n", file_table[i]);
+			//memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
 			i++;
 		}
 	}
