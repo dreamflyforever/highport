@@ -58,19 +58,27 @@ void * task_logic(void * data)
 	return NULL;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	int ret = 0;
+	if (argc != 4) {
+		hp_printf("usage : ./pmnn modle dir save_file");
+		ret = -1;
+		goto error;
+	}
 	//HANDLE obj;
         g_start = get_ms();
+	pchPath = argv[1];
+	hp_printf("%s\n", pchPath);
 	pthread_mutex_init(&mtx, NULL);
-
+	set_table(argv[2]);
 	//CPU_ZERO(&g_cpuset); 
 	session_init();
 	ret = batch_handle(BATCH, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 		BATCH, (g_end - g_start), g_start, g_end);
+error:
 	return ret;
 }
 

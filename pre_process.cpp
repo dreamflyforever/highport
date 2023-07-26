@@ -4,38 +4,37 @@
 using namespace MNN;
 
 #include <opencv2/opencv.hpp>
-const char *pchPath = "/home/pi/MNN/build/best_pref.mnn";
+//const char *pchPath = "/home/pi/MNN/build/best_pref.mnn";
+char *pchPath;
 #if 1
 Tensor *ptensorInput;
 Session *pSession;
-std::shared_ptr<Interpreter> net(Interpreter::createFromFile(pchPath));
-int times = 0;
+std::shared_ptr<Interpreter> net;//(Interpreter::createFromFile(pchPath));
 int session_init()
 {
-	if (times == 0) {
-		times = 1;
-		/*interpreter 解释器，是模型数据的持有者，我称之为net
-		 * session 会话，是推理数据的持有者，session通过interpreter创建，多个session可以公用一个interpreter
-		 * session 和TF的session类似
-		 * 我们需要通过net创建session1、session2等会话，然后再给session里送入数据，
-		 * 最后通过net->runSession(session)执行推理
-		 */
-	
-		// 创建session
-		ScheduleConfig config;
-		config.type  = MNN_FORWARD_AUTO;
-		pSession = net->createSession(config);
-		// 获取输入Tensor
-		// getSessionInput 用于获取单个输入tensor
-		ptensorInput = net->getSessionInput(pSession, NULL);
-		std::vector<int> vctInputDims = ptensorInput->shape();
-		printf("输入Tensor的维度为%d： ", times);
-		for (size_t i = 0; i < vctInputDims.size(); ++i)
-		{
-			printf("%d ", vctInputDims[i]);
-		}
-		printf("\n");
+	/*interpreter 解释器，是模型数据的持有者，我称之为net
+	 * session 会话，是推理数据的持有者，session通过interpreter创建，多个session可以公用一个interpreter
+	 * session 和TF的session类似
+	 * 我们需要通过net创建session1、session2等会话，然后再给session里送入数据，
+	 * 最后通过net->runSession(session)执行推理
+	 */
+
+	// 创建session
+	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
+	net = net_copy;
+	ScheduleConfig config;
+	config.type  = MNN_FORWARD_AUTO;
+	pSession = net->createSession(config);
+	// 获取输入Tensor
+	// getSessionInput 用于获取单个输入tensor
+	ptensorInput = net->getSessionInput(pSession, NULL);
+	std::vector<int> vctInputDims = ptensorInput->shape();
+	printf("输入Tensor的维度为： ");
+	for (size_t i = 0; i < vctInputDims.size(); ++i)
+	{
+		printf("%d ", vctInputDims[i]);
 	}
+	printf("\n");
 	return 0;
 }
 #endif

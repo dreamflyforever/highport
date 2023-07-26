@@ -12,5 +12,5 @@ include_directories(.  /usr/local/include)
 set(CMAKE_CXX_STANDARD 11)
 
 link_libraries(${SDK_INC}/libMNN.dylib)
-add_executable(main file_set_table.cpp pre_process.cpp core.cpp)
-target_link_libraries(main ${OpenCV_LIBS})
+add_executable(pmnn file_set_table.cpp pre_process.cpp core.cpp)
+target_link_libraries(pmnn ${OpenCV_LIBS})
