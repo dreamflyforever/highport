@@ -38,11 +38,13 @@ void * task_logic(void * data)
 	do {
 		for (int i = 0; i < 1; i++) {
 			long start = get_ms();
-			hp_printf("%s\n", file_table[n]);
+			//hp_printf("%s\n", file_table[n]);
 			picture_process(file_table[n]);
 			long end = get_ms();
+#if 0
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
 				(end - start), start, end, n);
+#endif
 		}
 	} while (0);
 	g_end = get_ms();
@@ -107,8 +109,8 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 		}
 	}
 	long end = get_ms();
-	hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
-			sum, (end - start), start, end);
+	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
+	//		sum, (end - start), start, end);
 
 	return ret;
 }
@@ -125,7 +127,7 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	pthread_attr_setschedparam(&attr, &param);
 	//long start = get_ms();
 	int n = *(int *)data;
-	hp_printf("data: %d\n", n);
+	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
 	//hp_printf("create phtread time : %ld ms\n", (get_ms() - start));
 	if (ret != 0) {

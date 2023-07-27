@@ -23,7 +23,7 @@ int session_init(char * path)
 	 * 最后通过net->runSession(session)执行推理
 	 */
 	pchPath = path;
-	hp_printf("%s\n", pchPath);
+	//hp_printf("%s\n", pchPath);
 	// 创建session
 	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
 	net = net_copy;
@@ -36,12 +36,14 @@ int session_init(char * path)
 	if (net == NULL || ptensorInput == NULL)
 		hp_printf(">>>>>>>>>>> error\n");
 	std::vector<int> vctInputDims = ptensorInput->shape();
+#if 0
 	printf("输入Tensor的维度为： ");
 	for (size_t i = 0; i < vctInputDims.size(); ++i)
 	{
 		printf("%d ", vctInputDims[i]);
 	}
 	printf("\n");
+#endif
 	return 0;
 }
 #endif
@@ -118,7 +120,7 @@ int picture_process(const char *path)
         }
         // 创建输出tensor
         std::shared_ptr<Tensor> outputUser(new Tensor(pTensorOutput, dimType));
-        MNN_PRINT("output size:%d\n", outputUser->elementSize());
+        //MNN_PRINT("output size:%d\n", outputUser->elementSize());
         // 拷贝出去
         pTensorOutput->copyToHostTensor(outputUser.get());
         auto type = outputUser->getType();
