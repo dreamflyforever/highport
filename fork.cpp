@@ -32,7 +32,7 @@ pthread_mutex_t mtx;
 void * task_logic(void * data)
 {
 	pthread_mutex_lock(&mtx);
-	int n = *(int *)data;
+	//int n = *(int *)data;
 #if 1
 	//core_set(n%3);
 	do {
@@ -55,7 +55,7 @@ void * task_logic(void * data)
 
 int main(int argc, char *argv[])
 {
-	int ret = 0, num_pthread;
+	int ret = 0, num_fork;
 	FILE * g_fp = NULL;
 	if (argc != 4) {
 		hp_printf("usage : ./pmnn modle dir save_file");
@@ -75,13 +75,13 @@ int main(int argc, char *argv[])
 	//HANDLE obj;
         g_start = get_ms();
 	pthread_mutex_init(&mtx, NULL);
-	num_pthread = set_table(argv[2]);
+	num_fork = set_table(argv[2]);
 	//CPU_ZERO(&g_cpuset); 
 	session_init(argv[1]);
-	ret = batch_handle(num_pthread, task_logic, NULL);
+	ret = batch_handle(num_fork, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
-		num_pthread, (g_end - g_start), g_start, g_end);
+		num_fork, (g_end - g_start), g_start, g_end);
 	if (g_flag == 1) {
 		fputs(g_buf, g_fp);
 		fclose(g_fp);
@@ -95,22 +95,26 @@ HANDLE patch_obj[BATCH];
 int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;
+	int pid;
 	long start = get_ms();
 	for (i = 0; i < sum; i++) {
-		ret = task_create(&patch_obj[i], cb, (void *)&i);
+		//ret = task_create(&patch_obj[i], cb, (void *)&i);
+		pid = fork();
+		if (!pid) {
+			break;hp_printf("create process error\n");
+		}
+		if (!pid) {
+			task_logic(NULL);
+			printf("I'm the %d child process.\n", i+1);
+		} else if (pid > 0) {
+			task_logic(NULL);
+			printf("I'm the parent process %d.\n", i);
+		}
 
-		if (ret != 0) {
-			perror("create pthread error\n");
-		}
-		// 等待线程结束
-		if (pthread_join(patch_obj[i].ct, NULL) != 0) {
-			fprintf(stderr, "Failed to join thread.\n");
-			return 1;
-		}
 	}
 	long end = get_ms();
-	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
-	//		sum, (end - start), start, end);
+	hp_printf("create  %d proces time : %ld ms, start time: %ld ms, end time: %ld ms \n",
+			sum, (end - start), start, end);
 
 	return ret;
 }
@@ -118,6 +122,7 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 {
 	int ret;
+#if 0
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setschedpolicy(&attr, SCHED_RR);
@@ -133,7 +138,7 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	if (ret != 0) {
 		perror("create pthread error\n");
 	}
-
+#endif
 	return ret;
 }
 
