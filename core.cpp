@@ -8,7 +8,7 @@
 #include <sched.h>
 
 typedef void * (*TASK_ENTRY) (void *p_arg);
-#define BATCH 100
+#define BATCH 200
 typedef struct HADNLE {
        pthread_t ct;
        TASK_ENTRY cb;
@@ -20,7 +20,7 @@ int task_create(HANDLE *task_obj, TASK_ENTRY handle_cb, void *data);
 int batch_handle(int sum, TASK_ENTRY handle_cb, void *data);
 void core_set(int cpu_core);
 
-int file_add;
+//int file_add;
 /*get microsecond*/
 long get_ms();
 long g_start;
@@ -36,8 +36,8 @@ void * task_logic(void * data)
 	do {
 		for (int i = 0; i < 1; i++) {
 			long start = get_ms();
-			hp_printf("%s\n", file_table[file_add]);
-			picture_process(file_table[file_add++]);
+			hp_printf("%s\n", file_table[n]);
+			picture_process(file_table[n]);
 			long end = get_ms();
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
 				(end - start), start, end, n);
@@ -51,7 +51,7 @@ void * task_logic(void * data)
 
 int main(int argc, char *argv[])
 {
-	int ret = 0;
+	int ret = 0, num_pthread;
 	if (argc != 4) {
 		hp_printf("usage : ./pmnn modle dir save_file");
 		ret = -1;
@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
 	//HANDLE obj;
         g_start = get_ms();
 	pthread_mutex_init(&mtx, NULL);
-	set_table(argv[2]);
+	num_pthread = set_table(argv[2]);
 	//CPU_ZERO(&g_cpuset); 
 	session_init(argv[1]);
-	ret = batch_handle(BATCH, task_logic, NULL);
+	ret = batch_handle(num_pthread, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
-		BATCH, (g_end - g_start), g_start, g_end);
+		num_pthread, (g_end - g_start), g_start, g_end);
 	fputs(g_buf, g_fp);
 	fclose(g_fp);
 error:
@@ -75,7 +75,6 @@ error:
 
 HANDLE patch_obj[BATCH];
 
-/*data maybe the per picture path*/
 int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;

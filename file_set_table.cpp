@@ -19,12 +19,12 @@ int set_table(const char * path)
 			&& strcmp(" ", ptr->d_name)!= 0) {
 			snprintf(file_table[i], 256, "%s/%s", path, ptr->d_name);
 			printf("d_name: %s\n", file_table[i]);
-			//memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
 			i++;
+			//memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
 		}
 	}
-	printf("file sum: %d\n", (i - 1));
-	ret = i-1;
+	printf("file sum: %d\n", i);
+	ret = i;
 #if 0
 	for (; i > 0; i--) {
 		printf("table: %s\n", file_table[i]);
