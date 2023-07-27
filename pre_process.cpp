@@ -84,7 +84,7 @@ int picture_process(const char *path)
     cv::Mat OnesImage(96, 96, CV_32FC3, cv::Scalar(1.0f, 2.0f, 3.0f));
     std::vector<std::vector<cv::Mat>> nChannels;
     std::vector<cv::Mat> rgbChannels(3);
-    cv::split(OnesImage, rgbChannels);
+    cv::split(matNormImage, rgbChannels);
     nChannels.push_back(rgbChannels); //  NHWC  转NCHW
     int size = 1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float);
     //char pvData[size];
