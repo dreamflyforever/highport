@@ -87,8 +87,8 @@ int picture_process(const char *path)
     cv::split(matNormImage, rgbChannels);
     nChannels.push_back(rgbChannels); //  NHWC  转NCHW
     int size = 1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float);
-    //char pvData[size];
-    char *pvData = (char *) malloc(size);
+    char pvData[size];
+    //char *pvData = (char *) malloc(size);
     int nPlaneSize = MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH;
     for (int c = 0; c < 3; ++c)
     {

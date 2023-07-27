@@ -207,7 +207,8 @@ int main(int argc, char *argv[])
     std::vector<cv::Mat> rgbChannels(3);
     cv::split(matNormImage, rgbChannels);
     nChannels.push_back(rgbChannels); //  NHWC  转NCHW
-    void *pvData = malloc(1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float));
+    //void *pvData = malloc(1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float));
+    char pvData[1 * 3 * MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH *sizeof(float)];
     int nPlaneSize = MODEL_INPUT_HEIGHT * MODEL_INPUT_WIDTH;
     for (int c = 0; c < 3; ++c)
     {
@@ -274,12 +275,14 @@ int main(int argc, char *argv[])
 		strcat(file_buf, tmpbuf );
 	}
     }
+#if 0
     // 释放我们创建的数据内存,这个不是tensor里的
     if (NULL != pvData)
     {
         free (pvData);
         pvData = NULL;
     }
+#endif
     // std::cout << "hello world " << std::endl;
 
 	end = get_ms();
