@@ -7,7 +7,6 @@ using namespace MNN;
 #include <opencv2/opencv.hpp>
 //const char *pchPath = "/home/pi/MNN/build/best_pref.mnn";
 char *pchPath;
-FILE * g_fp;
 #define g_size 1024 * 1024 * 10
 char g_buf[g_size];
 char tmpbuf[256];
@@ -23,10 +22,6 @@ int session_init(char * path)
 	 * 我们需要通过net创建session1、session2等会话，然后再给session里送入数据，
 	 * 最后通过net->runSession(session)执行推理
 	 */
-	g_fp = fopen("result.txt", "w");
-	if (NULL == g_fp) {
-		perror("error open file\n");
-	}
 	pchPath = path;
 	hp_printf("%s\n", pchPath);
 	// 创建session
@@ -146,10 +141,14 @@ int picture_process(const char *path)
             MNN_PRINT("%d, %f\n", tempValues[i].first, tempValues[i].second);
         }
 #endif
-	hp_printf("%s %d %f", path, tempValues[0].first, tempValues[0].second);
+	//hp_printf("%s %d %f", path, tempValues[0].first, tempValues[0].second);
+	if (g_flag == 0) {
+		printf("%s %d\n", path, tempValues[0].first);
+	} else {
 
-	snprintf(tmpbuf, 256, "%s %d\n", path, tempValues[0].first);
-	strcat(g_buf, tmpbuf );
+		snprintf(tmpbuf, 256, "%s %d\n", path, tempValues[0].first);
+		strcat(g_buf, tmpbuf);
+	}
 
     }
 #if 0

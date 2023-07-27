@@ -6,6 +6,7 @@
 #include <time.h>
 #include <pre_process.hpp>
 #include <sched.h>
+#include <string.h>
 
 typedef void * (*TASK_ENTRY) (void *p_arg);
 #define BATCH 200
@@ -25,6 +26,7 @@ void core_set(int cpu_core);
 long get_ms();
 long g_start;
 long g_end;
+int g_flag;
 pthread_mutex_t mtx;
 
 void * task_logic(void * data)
@@ -52,11 +54,22 @@ void * task_logic(void * data)
 int main(int argc, char *argv[])
 {
 	int ret = 0, num_pthread;
+	FILE * g_fp = NULL;
 	if (argc != 4) {
 		hp_printf("usage : ./pmnn modle dir save_file");
 		ret = -1;
 		goto error;
 	}
+	if (strcmp("save", argv[3]) == 0) {
+		g_flag = 1;
+		g_fp = fopen("./result.txt", "w");
+		if (g_fp == NULL) {
+			perror("fopen error\n");
+			ret = -1;
+			goto error;
+		}
+	}
+
 	//HANDLE obj;
         g_start = get_ms();
 	pthread_mutex_init(&mtx, NULL);
@@ -67,8 +80,10 @@ int main(int argc, char *argv[])
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 		num_pthread, (g_end - g_start), g_start, g_end);
-	fputs(g_buf, g_fp);
-	fclose(g_fp);
+	if (g_flag == 1) {
+		fputs(g_buf, g_fp);
+		fclose(g_fp);
+	}
 error:
 	return ret;
 }

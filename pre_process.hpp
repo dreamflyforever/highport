@@ -2,7 +2,7 @@ int picture_process(const char *path);
 int session_init(char * path);
 extern int set_table(const char * path);
 
-extern FILE * g_fp;
+extern int g_flag;
 extern char g_buf[1024 * 1024 * 10];
 
 #define FILE_NUM_MAX 2000
