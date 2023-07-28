@@ -9,7 +9,7 @@
 #include <string.h>
 
 typedef void * (*TASK_ENTRY) (void *p_arg);
-#define BATCH 200
+#define BATCH 20000
 typedef struct HADNLE {
        pthread_t ct;
        TASK_ENTRY cb;

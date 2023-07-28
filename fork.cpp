@@ -101,16 +101,16 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 		//ret = task_create(&patch_obj[i], cb, (void *)&i);
 		pid = fork();
 		if (!pid) {
-			break;hp_printf("create process error\n");
+			break; hp_printf("create process error\n");
 		}
+	
 		if (!pid) {
 			task_logic(NULL);
-			printf("I'm the %d child process.\n", i+1);
+			printf("I'm the %d child process.%d\n", i,  getpid());
 		} else if (pid > 0) {
 			task_logic(NULL);
-			printf("I'm the parent process %d.\n", i);
+			printf("I'm the %d parent process %d.\n", i, getpid());
 		}
-
 	}
 	long end = get_ms();
 	hp_printf("create  %d proces time : %ld ms, start time: %ld ms, end time: %ld ms \n",

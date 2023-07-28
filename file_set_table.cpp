@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "pre_process.hpp"
 
-#define FILE_NUM_MAX 2000
 char file_table[FILE_NUM_MAX][256];
 int set_table(const char * path)
 {
