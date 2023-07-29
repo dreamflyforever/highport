@@ -13,8 +13,8 @@
 #define FILE_NUM_MAX 5000
 #define FILE_SIZE_MAX 5000
 #include <opencv2/opencv.hpp>
-
-char file_table[FILE_NUM_MAX][256];
+#define path_size 521
+char file_table[FILE_NUM_MAX][path_size];
 
 cv::Mat pad(cv::Mat image, std::vector<int> padding, int fill=0, std::string padding_mode="constant") {
     int pad_left = padding[0];
@@ -71,32 +71,46 @@ cv::Mat rescale_pad(cv::Mat image, int output_size, int interpolation=cv::INTER_
     return padded_image;
 }
 
-int set_table(char * path)
-{
-	int fn;
-	struct dirent *ptr;
 
-	DIR *dir = opendir(path);
+static int file_index = 0;
+int set_table(const char *path)
+{
+	//定义一个 DIR 类的指针
+	DIR *pDir;
+	//定义一个结构体 dirent 的指针，dirent 结构体见上
+	struct dirent *ent;
 	int i = 0;
-	while ((ptr = readdir(dir)) != NULL) {
-		if(strcmp(".",ptr->d_name) ==0 || strcmp("..",ptr->d_name) ==  0 || strcmp(" ",ptr->d_name) ==  0) {
-			continue;
+	//定义一个字符数组，用来存放读取的路径
+	char childpath[512];
+
+	pDir = opendir(path); //  opendir 方法打开 path 目录，并将地址付给 pDir 指针
+	memset(childpath, 0, sizeof(childpath)); //将字符数组 childpath 的数组元素全部置零
+						 //读取 pDir 打开的目录，并赋值给 ent, 同时判断是否目录为空，不为空则执行循环体
+	while ((ent = readdir(pDir)) != NULL) {
+		//读取 打开目录的文件类型 并与 DT_DIR 进行位与运算操作，即如果读取的 d_type 类型为 DT_DIR (=4 表示读取的为目录)
+		if (ent->d_type & DT_DIR) {
+			if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+				//如果读取的 d_name 为 . 或者.. 表示读取的是当前目录符和上一目录符, 用 contiue 跳过，不进行下面的输出
+				continue;
+			}
+			//如果非. ..则将 路径 和 文件名 d_name 付给 childpath, 并在下一行 prinf 输出
+			snprintf(childpath, 512, "%s/%s", path, ent->d_name);
+			//printf("path:%s\n", childpath);
+			//递归读取下层的字目录内容， 因为是递归，所以从外往里逐次输出所有目录（路径+目录名），
+			//然后才在 else 中由内往外逐次输出所有文件名
+			set_table(childpath);
 		}
-		//printf("d_name: %s\n", ptr->d_name);
-		//memcpy(file_table[i], ptr->d_name, ptr->d_reclen);
-		snprintf(file_table[i], FILE_SIZE_MAX, "%s/%s", path, ptr->d_name);
-		i++;
+		//如果读取的 d_type 类型不是 DT_DIR, 即读取的不是目录，而是文件，则直接输出 d_name, 即输出文件名
+		else {
+			//printf("%s\n", ent->d_name);
+			snprintf(file_table[file_index], path_size, "%s/%s", path, ent->d_name);
+			//printf("d_name: %s\n", file_table[file_index]);
+			file_index++;
+		}
 	}
-	fn = i;
-#if 0
-	for (; i > 0; i--) {
-		printf("table: %s\n", file_table[i]);
-	}
-#endif
-	/*TODO: if file number > FILE NUMBER MAX*/
-	closedir(dir);
-	return fn;
+	return file_index;
 }
+
 #define DEBUG 1
 
 #if DEBUG
