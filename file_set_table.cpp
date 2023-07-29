@@ -45,9 +45,9 @@ int set_table(const char * path)
 #include <sys/types.h>
  
 // main 函数的 argv[1] char * 作为 所需要遍历的路径 传参数给 listDir
+static int file_index = 0;
 int set_table(const char *path)
 {
-	int index = 0;
 	//定义一个 DIR 类的指针
 	DIR *pDir;
 	//定义一个结构体 dirent 的指针，dirent 结构体见上
@@ -76,12 +76,12 @@ int set_table(const char *path)
 		//如果读取的 d_type 类型不是 DT_DIR, 即读取的不是目录，而是文件，则直接输出 d_name, 即输出文件名
 		else {
 			//printf("%s\n", ent->d_name);
-			snprintf(file_table[index], path_size, "%s/%s", path, ent->d_name);
-			//printf("d_name: %s\n", file_table[index]);
-			index++;
+			snprintf(file_table[file_index], path_size, "%s/%s", path, ent->d_name);
+			//printf("d_name: %s\n", file_table[file_index]);
+			file_index++;
 		}
 	}
-	return index;
+	return file_index;
 }
 
 #if 0
