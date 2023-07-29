@@ -6,7 +6,8 @@ extern int g_flag;
 extern char g_buf[1024 * 1024 * 10];
 
 #define FILE_NUM_MAX 20000
-extern char file_table[FILE_NUM_MAX][256];
+#define path_size 512
+extern char file_table[FILE_NUM_MAX][path_size];
 
 #define DEBUG 1
 
