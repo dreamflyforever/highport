@@ -68,7 +68,7 @@ int set_table(const char *path)
 			}
 			//如果非. ..则将 路径 和 文件名 d_name 付给 childpath, 并在下一行 prinf 输出
 			snprintf(childpath, 512, "%s/%s", path, ent->d_name);
-			printf("path:%s\n", childpath);
+			//printf("path:%s\n", childpath);
 			//递归读取下层的字目录内容， 因为是递归，所以从外往里逐次输出所有目录（路径+目录名），
 			//然后才在 else 中由内往外逐次输出所有文件名
 			set_table(childpath);
@@ -77,7 +77,7 @@ int set_table(const char *path)
 		else {
 			//printf("%s\n", ent->d_name);
 			snprintf(file_table[index], path_size, "%s/%s", path, ent->d_name);
-			printf("d_name: %s\n", file_table[index]);
+			//printf("d_name: %s\n", file_table[index]);
 			index++;
 		}
 	}
