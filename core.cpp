@@ -44,7 +44,7 @@ void * task_logic(void * data)
 			picture_process(file_table[file_add++]);
 			unsigned long end = get_ms();
 #if 0
-			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
+			hp_printf("per picture process time : %lu ms, start time: %lu ms, end time: %lu ms, id: %d \n",
 				(end - start), start, end, n);
 #endif
 		}
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	session_init(argv[1]);
 	ret = batch_handle(num_pthread, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
-	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
+	hp_printf("process  %d phtread time : %lu ms, start time: %lu ms, end time: %lu ms \n",
 		DIVISOR, (g_end - g_start), g_start, g_end);
 	if (g_flag == 1) {
 		fputs(g_buf, g_fp);
