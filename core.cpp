@@ -8,6 +8,8 @@
 #include <sched.h>
 #include <string.h>
 
+#define DIVISOR 4
+
 typedef void * (*TASK_ENTRY) (void *p_arg);
 #define BATCH 20000
 typedef struct HADNLE {
@@ -21,7 +23,7 @@ int task_create(HANDLE *task_obj, TASK_ENTRY handle_cb, void *data);
 int batch_handle(int sum, TASK_ENTRY handle_cb, void *data);
 void core_set(int cpu_core);
 
-//int file_add;
+int file_add;
 /*get microsecond*/
 long get_ms();
 long g_start;
@@ -36,10 +38,10 @@ void * task_logic(void * data)
 #if 1
 	//core_set(n%3);
 	do {
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < n; i++) {
 			long start = get_ms();
-			//hp_printf("%s\n", file_table[n]);
-			picture_process(file_table[n]);
+			//hp_printf("%s\n", file_table[file_add]);
+			picture_process(file_table[file_add++]);
 			long end = get_ms();
 #if 0
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
@@ -81,7 +83,7 @@ int main(int argc, char *argv[])
 	ret = batch_handle(num_pthread, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
-		num_pthread, (g_end - g_start), g_start, g_end);
+		DIVISOR, (g_end - g_start), g_start, g_end);
 	if (g_flag == 1) {
 		fputs(g_buf, g_fp);
 		fclose(g_fp);
@@ -96,8 +98,10 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;
 	long start = get_ms();
-	for (i = 0; i < sum; i++) {
-		ret = task_create(&patch_obj[i], cb, (void *)&i);
+	int quotient = sum / DIVISOR;
+	int remainder = sum % DIVISOR;
+	for (i = 0; i < DIVISOR; i++) {
+		ret = task_create(&patch_obj[i], cb, (void *)&quotient);
 
 		if (ret != 0) {
 			perror("create pthread error\n");
@@ -108,6 +112,7 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 			return 1;
 		}
 	}
+	task_logic((void *)&remainder);
 	long end = get_ms();
 	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 	//		sum, (end - start), start, end);
