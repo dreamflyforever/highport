@@ -25,9 +25,9 @@ void core_set(int cpu_core);
 
 int file_add;
 /*get microsecond*/
-long get_ms();
-long g_start;
-long g_end;
+unsigned long get_ms();
+unsigned long g_start;
+unsigned long g_end;
 int g_flag;
 pthread_mutex_t mtx;
 
@@ -39,10 +39,10 @@ void * task_logic(void * data)
 	//core_set(n%3);
 	do {
 		for (int i = 0; i < n; i++) {
-			long start = get_ms();
+			unsigned long start = get_ms();
 			//hp_printf("%s\n", file_table[file_add]);
 			picture_process(file_table[file_add++]);
-			long end = get_ms();
+			unsigned long end = get_ms();
 #if 0
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
 				(end - start), start, end, n);
@@ -97,7 +97,7 @@ HANDLE patch_obj[BATCH];
 int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;
-	long start = get_ms();
+	unsigned long start = get_ms();
 	int quotient = sum / DIVISOR;
 	int remainder = sum % DIVISOR;
 	for (i = 0; i < DIVISOR; i++) {
@@ -113,7 +113,7 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 		}
 	}
 	task_logic((void *)&remainder);
-	long end = get_ms();
+	unsigned long end = get_ms();
 	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 	//		sum, (end - start), start, end);
 
@@ -130,7 +130,7 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	param.sched_priority = sched_get_priority_max(SCHED_RR); // 优先级设置,获取最大优先级
 	//param.sched_priority = 10;
 	pthread_attr_setschedparam(&attr, &param);
-	//long start = get_ms();
+	//unsigned long start = get_ms();
 	int n = *(int *)data;
 	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
@@ -142,7 +142,7 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	return ret;
 }
 
-long get_ms()
+unsigned long get_ms()
 {
 #if 0
 	struct timeval timestamp = {};
