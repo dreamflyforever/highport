@@ -35,6 +35,39 @@ int SUM;
 void * task_logic(void * data)
 {
 	int n = SUM / DIVISOR;
+	int pt = *(int *)data;
+	hp_printf("pt : %d\n", pt);
+	if (data != NULL)
+		pthread_mutex_lock(&mtx[pt]);
+#if 1
+#if PI_BOARD
+	core_set(file_add%4);
+#endif
+	do {
+		for (int i = 0; i < n; i++) {
+			unsigned long start = get_ms();
+			//hp_printf("%s\n", file_table[file_add]);
+			//usleep(1);
+			//hp_printf("%d %lu\n", gettid(), get_file_size(file_table[file_add]));
+			picture_process(file_table[file_add++], pt);
+			unsigned long end = get_ms();
+#if 0
+			hp_printf("per picture process time : %lu ms, start time: %lu ms, end time: %lu ms, id: %d \n",
+				(end - start), start, end, n);
+#endif
+		}
+	} while (0);
+	g_end = get_ms();
+#endif
+	if (data != NULL)
+		pthread_mutex_unlock(&mtx[pt]);
+	return NULL;
+}
+
+#if 0
+void * task_logic(void * data)
+{
+	int n = SUM / DIVISOR;
 	pthread_mutex_t mtx = *(pthread_mutex_t *)data;
 	if (data != NULL)
 		pthread_mutex_lock(&mtx);
@@ -64,6 +97,7 @@ void * task_logic(void * data)
 	return NULL;
 }
 
+#endif
 int main(int argc, char *argv[])
 {
 	int ret = 0, num_pthread;
@@ -105,14 +139,19 @@ HANDLE patch_obj[BATCH];
 int batch_handle(int sum, TASK_ENTRY cb, void *data)
 {
 	int ret = 0, i;
+
+	pthread_mutex_t l_mtx;
+	pthread_mutex_init(&l_mtx, NULL);
 	unsigned long start = get_ms();
 	int quotient = sum / DIVISOR;
 	int remainder = sum % DIVISOR;
 	for (i = 0; i < DIVISOR; i++) {
 		session_init(model_path, i);
 		pthread_mutex_init(&mtx[i], NULL);
-		ret = task_create(&patch_obj[i], cb, (void *)&mtx[i]);
 
+		pthread_mutex_lock(&l_mtx);
+		ret = task_create(&patch_obj[i], cb, (void *)&i);
+		pthread_mutex_unlock(&l_mtx);
 		if (ret != 0) {
 			perror("create pthread error\n");
 		}
@@ -124,13 +163,17 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 		}
 	}
 #endif
+#if 1
 	//task_logic((void *)&remainder);
 	hp_printf("enter main pthread handle\n");
 	session_init(model_path, DIVISOR);
+	hp_printf("===========\n");
 	for (i = 0; i < remainder; i++) {
+		hp_printf("===========\n");
 		picture_process(file_table[file_add++], DIVISOR);
 	}
-	unsigned long end = get_ms();
+#endif
+	//unsigned long end = get_ms();
 	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 	//		sum, (end - start), start, end);
 
@@ -139,6 +182,7 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 
 int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 {
+
 	int ret;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -151,8 +195,10 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	//unsigned long start = get_ms();
 #endif
 	int n = *(int *)data;
+	hp_printf("%d\n", n);
 	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
+	usleep(100);
 	//ret = pthread_create(&(obj->ct), NULL, cb, data);
 	//hp_printf("create phtread time : %ld ms\n", (get_ms() - start));
 	if (ret != 0) {

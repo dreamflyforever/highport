@@ -20,12 +20,12 @@ pid_t gettid(void)
 }
 
 #if 1
-Tensor *ptensorInput[DIVISOR + 10];
-Session *pSession[DIVISOR + 10];
-std::shared_ptr<Interpreter> net[DIVISOR + 10];//(Interpreter::createFromFile(pchPath));
+Tensor *ptensorInput[DIVISOR + 1];
+Session *pSession[DIVISOR + 1];
+std::shared_ptr<Interpreter> net[DIVISOR + 1];//(Interpreter::createFromFile(pchPath));
 int session_init(char * path, int which)
 {
-	hp_printf("%d\n", which);
+	hp_printf("%d, model path %s\n", which, path);
 	/*interpreter 解释器，是模型数据的持有者，我称之为net[which]
 	 * session 会话，是推理数据的持有者，session通过interpreter创建，多个session可以公用一个interpreter
 	 * session 和TF的session类似
@@ -36,6 +36,9 @@ int session_init(char * path, int which)
 	//hp_printf("%s\n", pchPath);
 	// 创建session
 	std::shared_ptr<Interpreter> net_copy(Interpreter::createFromFile(pchPath));
+	if (NULL == net_copy) {
+		hp_printf("create net error\n");
+	}
 	net[which] = net_copy;
 	ScheduleConfig config;
 	config.type  = MNN_FORWARD_AUTO;
@@ -43,8 +46,12 @@ int session_init(char * path, int which)
 	// 获取输入Tensor
 	// getSessionInput 用于获取单个输入tensor
 	ptensorInput[which] = net[which]->getSessionInput(pSession[which], NULL);
-	if (net[which] == NULL || ptensorInput[which] == NULL)
-		hp_printf(">>>>>>>>>>> error\n");
+	if (net[which] == NULL || ptensorInput[which] == NULL) {
+		hp_printf(">>>>>>>>>>> %d error\n", which);
+	} else {
+		//hp_printf(">>>>>>>>>>> %d %p %p success\n", which, (void *)net[which], ptensorInput[which]);
+	}
+
 	std::vector<int> vctInputDims = ptensorInput[which]->shape();
 
 	return 0;
@@ -52,10 +59,15 @@ int session_init(char * path, int which)
 #endif
 int picture_process(const char *path, int which)
 {
-	hp_printf("%d\n", which);
+	if (net[which] == NULL || ptensorInput[which] == NULL) {
+		hp_printf(">>>>>>>>>>>%d error\n", which);
+	} else {
+		hp_printf("success %d\n", which);
+	}
+
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
     cv::Mat matBgrImg = cv::imread(path);
-    hp_printf("[pid width height] %p %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols);
+    hp_printf("[pid width height pthread] %p %d %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols, which);
     cv::Mat matNormImage;
     cv::Mat matRzRgbImage, matFloatImage;
     int MODEL_INPUT_HEIGHT = 96;
