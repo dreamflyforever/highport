@@ -8,8 +8,7 @@
 #include <sched.h>
 #include <string.h>
 
-#define DIVISOR 4
-
+#define PI_BOARD 0
 typedef void * (*TASK_ENTRY) (void *p_arg);
 #define BATCH 20000
 typedef struct HADNLE {
@@ -29,20 +28,28 @@ unsigned long get_ms();
 unsigned long g_start;
 unsigned long g_end;
 int g_flag;
-pthread_mutex_t mtx;
+char model_path[2048];
+pthread_mutex_t mtx[DIVISOR];
+int SUM;
 
 void * task_logic(void * data)
 {
-	pthread_mutex_lock(&mtx);
-	int n = *(int *)data;
+	int n = SUM / DIVISOR;
+	pthread_mutex_t mtx = *(pthread_mutex_t *)data;
+	if (data != NULL)
+		pthread_mutex_lock(&mtx);
+	//int n = *(int *)data;
 #if 1
-	//core_set(file_add%4);
+#if PI_BOARD
+	core_set(file_add%4);
+#endif
 	do {
 		for (int i = 0; i < n; i++) {
 			unsigned long start = get_ms();
 			//hp_printf("%s\n", file_table[file_add]);
+			//usleep(1);
 			//hp_printf("%d %lu\n", gettid(), get_file_size(file_table[file_add]));
-			picture_process(file_table[file_add++]);
+			picture_process(file_table[file_add++], i%4);
 			unsigned long end = get_ms();
 #if 0
 			hp_printf("per picture process time : %lu ms, start time: %lu ms, end time: %lu ms, id: %d \n",
@@ -52,7 +59,8 @@ void * task_logic(void * data)
 	} while (0);
 	g_end = get_ms();
 #endif
-	pthread_mutex_unlock(&mtx);
+	if (data != NULL)
+		pthread_mutex_unlock(&mtx);
 	return NULL;
 }
 
@@ -75,12 +83,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	//HANDLE obj;
         g_start = get_ms();
-	pthread_mutex_init(&mtx, NULL);
+	//pthread_mutex_init(&mtx, NULL);
 	num_pthread = set_table(argv[2]);
-	//CPU_ZERO(&g_cpuset); 
-	session_init(argv[1]);
+	memcpy(model_path, argv[1], strlen(argv[1]));
+	SUM = num_pthread;
 	ret = batch_handle(num_pthread, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %lu ms, start time: %lu ms, end time: %lu ms \n",
@@ -102,18 +109,27 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 	int quotient = sum / DIVISOR;
 	int remainder = sum % DIVISOR;
 	for (i = 0; i < DIVISOR; i++) {
-		ret = task_create(&patch_obj[i], cb, (void *)&quotient);
+		session_init(model_path, i);
+		pthread_mutex_init(&mtx[i], NULL);
+		ret = task_create(&patch_obj[i], cb, (void *)&mtx[i]);
 
 		if (ret != 0) {
 			perror("create pthread error\n");
 		}
-		// 等待线程结束
-		if (pthread_join(patch_obj[i].ct, NULL) != 0) {
+	}
+#if 1
+	for (i = 0; i < DIVISOR; i++) {
+		if (pthread_join(patch_obj[(i)].ct, NULL) != 0) {
 			fprintf(stderr, "Failed to join thread.\n");
-			return 1;
 		}
 	}
-	task_logic((void *)&remainder);
+#endif
+	//task_logic((void *)&remainder);
+	hp_printf("enter main pthread handle\n");
+	session_init(model_path, DIVISOR);
+	for (i = 0; i < remainder; i++) {
+		picture_process(file_table[file_add++], DIVISOR);
+	}
 	unsigned long end = get_ms();
 	//hp_printf("create  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
 	//		sum, (end - start), start, end);
@@ -126,20 +142,22 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	int ret;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
+#if 1
 	pthread_attr_setschedpolicy(&attr, SCHED_RR);
 	struct sched_param param;
 	param.sched_priority = sched_get_priority_max(SCHED_RR); // 优先级设置,获取最大优先级
 	//param.sched_priority = 10;
 	pthread_attr_setschedparam(&attr, &param);
 	//unsigned long start = get_ms();
+#endif
 	int n = *(int *)data;
 	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
+	//ret = pthread_create(&(obj->ct), NULL, cb, data);
 	//hp_printf("create phtread time : %ld ms\n", (get_ms() - start));
 	if (ret != 0) {
 		perror("create pthread error\n");
 	}
-
 	return ret;
 }
 
@@ -160,6 +178,7 @@ unsigned long get_ms()
 	    return 0;
 }
 
+#if PI_BOARD
 #if 0
 void core_set(int cpu_core)
 {
@@ -175,6 +194,19 @@ void core_set(int cpu_core)
 	}
 
 	// 在绑定的CPU核心上执行一些工作
-	printf("Thread running on CPU core: %d\n", cpu_core);
+	//printf("Thread running on CPU core: %d\n", cpu_core);
 }
+#endif
+inline void core_set(int num)
+{
+	int result;
+	cpu_set_t mask;
+	CPU_ZERO(&mask); // 将掩码清零
+	CPU_SET(num, &mask); // 将num添加到掩码中，该进程绑定到num核心
+	result = sched_setaffinity(0, sizeof(mask), &mask);
+	if (result < 0) {
+		printf("binding CPU fails\n");
+	}
+}
+
 #endif

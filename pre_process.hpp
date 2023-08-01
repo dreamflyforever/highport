@@ -1,5 +1,5 @@
-int picture_process(const char *path);
-int session_init(char * path);
+int picture_process(const char *path, int which);
+int session_init(char * path, int which);
 extern int set_table(const char * path);
 
 extern int g_flag;
@@ -21,3 +21,5 @@ extern char file_table[FILE_NUM_MAX][path_size];
 #endif
 
 extern unsigned long get_file_size(const char *path);
+
+#define DIVISOR 4

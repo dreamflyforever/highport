@@ -39,7 +39,7 @@ void * task_logic(void * data)
 		for (int i = 0; i < 1; i++) {
 			long start = get_ms();
 			//hp_printf("%s\n", file_table[n]);
-			picture_process(file_table[file_add++]);
+			picture_process(file_table[file_add++], i);
 			long end = get_ms();
 #if 0
 			hp_printf("per picture process time : %ld ms, start time: %ld ms, end time: %ld ms, id: %d \n",
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	pthread_mutex_init(&mtx, NULL);
 	num_fork = set_table(argv[2]);
 	//CPU_ZERO(&g_cpuset); 
-	session_init(argv[1]);
+	session_init(argv[1], 0);
 	ret = batch_handle(num_fork, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
 	hp_printf("process  %d phtread time : %ld ms, start time: %ld ms, end time: %ld ms \n",
