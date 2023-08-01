@@ -10,6 +10,14 @@ char *pchPath;
 #define g_size 1024 * 1024 * 10
 char g_buf[g_size];
 char tmpbuf[256];
+
+#include <unistd.h>
+#include <sys/syscall.h> 
+pid_t gettid(void)
+{
+	return syscall(SYS_gettid);
+}
+
 #if 1
 Tensor *ptensorInput;
 Session *pSession;
@@ -70,6 +78,7 @@ int picture_process(const char *path)
 #endif
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
     cv::Mat matBgrImg = cv::imread(path);
+    hp_printf("[pid width height] %d %d %d\n", gettid(), matBgrImg.rows, matBgrImg.cols);
     cv::Mat matNormImage;
     cv::Mat matRzRgbImage, matFloatImage;
     int MODEL_INPUT_HEIGHT = 96;
