@@ -7,6 +7,7 @@
 #include <pre_process.hpp>
 #include <sched.h>
 #include <string.h>
+#include <sys/syscall.h> 
 
 #define DIVISOR 4
 
@@ -31,16 +32,23 @@ unsigned long g_end;
 int g_flag;
 pthread_mutex_t mtx;
 
+ 
+pid_t gettid(void)
+{
+	return syscall(SYS_gettid);
+}
+
 void * task_logic(void * data)
 {
 	pthread_mutex_lock(&mtx);
 	int n = *(int *)data;
 #if 1
-	//core_set(n%3);
+	//core_set(file_add%4);
 	do {
 		for (int i = 0; i < n; i++) {
 			unsigned long start = get_ms();
 			//hp_printf("%s\n", file_table[file_add]);
+			hp_printf("%d %lu\n", gettid(), get_file_size(file_table[file_add]));
 			picture_process(file_table[file_add++]);
 			unsigned long end = get_ms();
 #if 0

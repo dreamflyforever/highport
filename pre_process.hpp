@@ -20,4 +20,4 @@ extern char file_table[FILE_NUM_MAX][path_size];
 #define hp_printf(format, ...)
 #endif
 
-
+extern unsigned long get_file_size(const char *path);
