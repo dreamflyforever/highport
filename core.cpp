@@ -36,7 +36,6 @@ void * task_logic(void * data)
 {
 	int n = SUM / DIVISOR;
 	int pt = *(int *)data;
-	hp_printf("pt : %d\n", pt);
 	if (data != NULL)
 		pthread_mutex_lock(&mtx[pt]);
 #if 1
@@ -165,11 +164,8 @@ int batch_handle(int sum, TASK_ENTRY cb, void *data)
 #endif
 #if 1
 	//task_logic((void *)&remainder);
-	hp_printf("enter main pthread handle\n");
 	session_init(model_path, DIVISOR);
-	hp_printf("===========\n");
 	for (i = 0; i < remainder; i++) {
-		hp_printf("===========\n");
 		picture_process(file_table[file_add++], DIVISOR);
 	}
 #endif
@@ -195,7 +191,6 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	//unsigned long start = get_ms();
 #endif
 	int n = *(int *)data;
-	hp_printf("%d\n", n);
 	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
 	usleep(100);

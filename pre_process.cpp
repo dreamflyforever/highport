@@ -25,7 +25,6 @@ Session *pSession[DIVISOR + 1];
 std::shared_ptr<Interpreter> net[DIVISOR + 1];//(Interpreter::createFromFile(pchPath));
 int session_init(char * path, int which)
 {
-	hp_printf("%d, model path %s\n", which, path);
 	/*interpreter 解释器，是模型数据的持有者，我称之为net[which]
 	 * session 会话，是推理数据的持有者，session通过interpreter创建，多个session可以公用一个interpreter
 	 * session 和TF的session类似
@@ -62,7 +61,7 @@ int picture_process(const char *path, int which)
 	if (net[which] == NULL || ptensorInput[which] == NULL) {
 		hp_printf(">>>>>>>>>>>%d error\n", which);
 	} else {
-		hp_printf("success %d\n", which);
+		//hp_printf("success %d\n", which);
 	}
 
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
