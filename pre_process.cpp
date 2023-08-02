@@ -123,13 +123,13 @@ int picture_process(const char *path, int which)
 
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
     cv::Mat matBgrImg = cv::imread(path);
-    cv::Mat matBgrRescaleImg = rescale_pad(matBgrImg, 96);
+    cv::Mat matBgrRescaleImg = rescale_pad(matBgrImg, 128);
     cv::Mat matRgbRescaleImg;
     cv::cvtColor(matBgrRescaleImg, matRgbRescaleImg, cv::COLOR_BGR2RGB);
     //hp_printf("[pid width height pthread] %p %d %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols, which);
     cv::Mat matNormImage;
-    int MODEL_INPUT_HEIGHT = 96;
-    int MODEL_INPUT_WIDTH = 96;
+    int MODEL_INPUT_HEIGHT = 128;
+    int MODEL_INPUT_WIDTH = 128;
     matRgbRescaleImg.convertTo(matRgbRescaleImg, CV_32FC3);
     cv::Mat matStd(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, CV_32FC3, cv::Scalar(58.395f, 57.12f, 57.375f));
     cv::Mat matMean(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, CV_32FC3, \
