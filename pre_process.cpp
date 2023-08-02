@@ -24,6 +24,62 @@ pid_t gettid(void)
 Tensor *ptensorInput[DIVISOR + 1];
 Session *pSession[DIVISOR + 1];
 std::shared_ptr<Interpreter> net[DIVISOR + 1];//(Interpreter::createFromFile(pchPath));
+
+cv::Mat pad(cv::Mat image, std::vector<int> padding, int fill=0, std::string padding_mode="constant") {
+    int pad_left = padding[0];
+    int pad_top = padding[1];
+    int pad_right = padding[2];
+    int pad_bottom = padding[3];
+
+    cv::Mat padded_image;
+    // printf("padding: %d %d %d %d\n", pad_left, pad_top, pad_right, pad_bottom);
+    cv::copyMakeBorder(image, padded_image, pad_top, pad_bottom, pad_left, pad_right, cv::BORDER_CONSTANT, cv::Scalar(fill));
+
+    return padded_image;
+}
+
+cv::Mat rescale(cv::Mat image, int output_size, int interpolation=cv::INTER_LINEAR) {
+    int h = image.rows;
+    int w = image.cols;
+
+    double new_h, new_w;
+    if (output_size > 0) {
+        if (h < w) {
+            new_h = output_size * h / w;
+            new_w = output_size;
+        } else {
+            new_h = output_size;
+            new_w = output_size * w / h;
+        }
+    } else {
+        new_h = output_size;
+        new_w = output_size;
+    }
+
+    cv::Mat resized_image;
+    cv::resize(image, resized_image, cv::Size(static_cast<int>(new_w), static_cast<int>(new_h)), 0, 0, interpolation);
+
+    return resized_image;
+}
+
+cv::Mat rescale_pad(cv::Mat image, int output_size, int interpolation=cv::INTER_LINEAR, int fill=0, std::string padding_mode="constant") {
+    cv::Mat resized_image = rescale(image, output_size, interpolation);
+    // return resized_image;
+    int h = resized_image.rows;
+    int w = resized_image.cols;
+
+    int pad_left = (output_size - w) / 2;
+    int pad_right = output_size - w - pad_left;
+    int pad_top = (output_size - h) / 2;
+    int pad_bottom = output_size - h - pad_top;
+
+    std::vector<int> padding = {pad_left, pad_top, pad_right, pad_bottom};
+
+    cv::Mat padded_image = pad(resized_image, padding, fill, padding_mode);
+
+    return padded_image;
+}
+
 int session_init(char * path, int which)
 {
 	/*interpreter 解释器，是模型数据的持有者，我称之为net[which]
@@ -67,19 +123,19 @@ int picture_process(const char *path, int which)
 
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
     cv::Mat matBgrImg = cv::imread(path);
+    cv::Mat matBgrRescaleImg = rescale_pad(matBgrImg, 96);
+    cv::Mat matRgbRescaleImg;
+    cv::cvtColor(matBgrRescaleImg, matRgbRescaleImg, cv::COLOR_BGR2RGB);
     hp_printf("[pid width height pthread] %p %d %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols, which);
     cv::Mat matNormImage;
-    cv::Mat matRzRgbImage, matFloatImage;
     int MODEL_INPUT_HEIGHT = 96;
     int MODEL_INPUT_WIDTH = 96;
-    cv::Mat matStd(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, CV_32FC3, cv::Scalar(57.375f, 57.12f, 58.395f));
-    cv::resize(matBgrImg, matRzRgbImage, cv::Size(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT));
-    matRzRgbImage.convertTo(matFloatImage, CV_32FC3);
+    matRgbRescaleImg.convertTo(matRgbRescaleImg, CV_32FC3);
+    cv::Mat matStd(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, CV_32FC3, cv::Scalar(58.395f, 57.12f, 57.375f));
     cv::Mat matMean(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, CV_32FC3, \
-                        cv::Scalar(103.53f, 116.28f, 123.675f)); // 均值
+                        cv::Scalar(123.675f, 116.28f, 103.53f)); // 均值
 
-    matNormImage = (matFloatImage - matMean) / matStd;
-    cv::Mat OnesImage(96, 96, CV_32FC3, cv::Scalar(1.0f, 2.0f, 3.0f));
+    matNormImage = (matRgbRescaleImg - matMean) / matStd;
     std::vector<std::vector<cv::Mat>> nChannels;
     std::vector<cv::Mat> rgbChannels(3);
     cv::split(matNormImage, rgbChannels);
