@@ -126,7 +126,7 @@ int picture_process(const char *path, int which)
     cv::Mat matBgrRescaleImg = rescale_pad(matBgrImg, 96);
     cv::Mat matRgbRescaleImg;
     cv::cvtColor(matBgrRescaleImg, matRgbRescaleImg, cv::COLOR_BGR2RGB);
-    hp_printf("[pid width height pthread] %p %d %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols, which);
+    //hp_printf("[pid width height pthread] %p %d %d %d\n", pthread_self(), matBgrImg.rows, matBgrImg.cols, which);
     cv::Mat matNormImage;
     int MODEL_INPUT_HEIGHT = 96;
     int MODEL_INPUT_WIDTH = 96;

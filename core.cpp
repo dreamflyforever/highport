@@ -194,7 +194,7 @@ int task_create(HANDLE *obj, TASK_ENTRY cb, void *data)
 	int n = *(int *)data;
 	//hp_printf("data: %d\n", n);
 	ret = pthread_create(&(obj->ct), &attr, cb, data);
-	usleep(10000);
+	usleep(20000);
 	//ret = pthread_create(&(obj->ct), NULL, cb, data);
 	//hp_printf("create phtread time : %ld ms\n", (get_ms() - start));
 	if (ret != 0) {
