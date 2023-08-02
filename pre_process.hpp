@@ -23,3 +23,4 @@ extern char file_table[FILE_NUM_MAX][path_size];
 extern unsigned long get_file_size(const char *path);
 
 #define DIVISOR 4
+extern pthread_mutex_t buf_mtx;

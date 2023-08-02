@@ -14,6 +14,7 @@ char tmpbuf[256];
 #include <unistd.h>
 #include <sys/syscall.h> 
 
+pthread_mutex_t buf_mtx;
 pid_t gettid(void)
 {
 	return syscall(SYS_gettid);
@@ -141,6 +142,7 @@ int picture_process(const char *path, int which)
         }
 #endif
 	//hp_printf("%s %d %f", path, tempValues[0].first, tempValues[0].second);
+	pthread_mutex_lock(&buf_mtx);
 	if (g_flag == 0) {
 		printf("%s %d\n", path, tempValues[0].first);
 	} else {
@@ -148,6 +150,7 @@ int picture_process(const char *path, int which)
 		snprintf(tmpbuf, 256, "%s %d\n", path, tempValues[0].first);
 		strcat(g_buf, tmpbuf);
 	}
+	pthread_mutex_unlock(&buf_mtx);
 
     }
     return 0;

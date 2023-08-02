@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
 	}
 
         g_start = get_ms();
+	pthread_mutex_init(&buf_mtx, NULL);
 	//pthread_mutex_init(&mtx, NULL);
 	num_pthread = set_table(argv[2]);
 	memcpy(model_path, argv[1], strlen(argv[1]));
