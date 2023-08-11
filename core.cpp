@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
 {
 	int ret = 0, num_pthread;
 	FILE * g_fp = NULL;
+	int file_flag = 0;
 
 	//std::string modelFile = argv[1];
 #if 1
@@ -154,9 +155,10 @@ int main(int argc, char *argv[])
 	uint8_t result[16];
 	if (MD5(argv[1], result) == 1) {
 		if (result[1] == 218) {
-			hp_printf("right modle\n");
-			decryptModel(encryptedModelFile, decryptedModelFile, password);  // 解密模型文件		/*XXX:TODO*/
-			memcpy(model_path, "../libdeos.so", 13);
+			//hp_printf("right modle\n");
+			decryptModel(encryptedModelFile, decryptedModelFile, password);
+			memcpy(model_path, "libdeos.so", 16);
+			file_flag = 1;
 		} else {
 			hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
@@ -165,11 +167,8 @@ int main(int argc, char *argv[])
 			hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
 	}
+	hp_printf("%s\n", model_path);
 #endif
-	memcpy(model_path, argv[1], strlen(argv[1]));
-
-	// 在实际使用时，需要解密模型才能加载和使用
-
         g_start = get_ms();
 	pthread_mutex_init(&buf_mtx, NULL);
 	//pthread_mutex_init(&mtx, NULL);
@@ -182,6 +181,10 @@ int main(int argc, char *argv[])
 	if (g_flag == 1) {
 		fputs(g_buf, g_fp);
 		fclose(g_fp);
+	}
+	if (file_flag == 1) {
+		remove("libdeos.so");
+		//hp_printf("remove file\n");
 	}
 error:
 	return ret;
