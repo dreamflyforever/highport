@@ -8,6 +8,11 @@
 #include <sched.h>
 #include <string.h>
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+
 #define PI_BOARD 0
 typedef void * (*TASK_ENTRY) (void *p_arg);
 #define BATCH 20000
@@ -97,10 +102,39 @@ void * task_logic(void * data)
 }
 
 #endif
+
+// 解密函数
+void decryptModel(const std::string& inputFile, const std::string& outputFile, const std::string& password) {
+	std::ifstream inFile(inputFile, std::ios::binary);
+	std::ofstream outFile(outputFile, std::ios::binary);
+
+	char ch;
+	size_t i = 0;
+	while (inFile.get(ch)) {
+		// 使用密码进行异或解密
+		ch ^= password[i % password.length()];
+		outFile.put(ch);
+		i++;
+	}
+
+	inFile.close();
+	outFile.close();
+
+	std::cout << "模型已成功解密为：" << outputFile << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
 	int ret = 0, num_pthread;
 	FILE * g_fp = NULL;
+
+	//std::string modelFile = argv[1];
+
+	std::string encryptedModelFile = argv[1];
+	std::string decryptedModelFile = "deos.so";
+
+	std::string password = "myPassword123";  // 设置加密和解密的密码
+
 	if (argc != 4) {
 		hp_printf("usage : ./pmnn modle dir save_file");
 		ret = -1;
@@ -116,11 +150,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	//memcpy(model_path, argv[1], strlen(argv[1]));
+	memcpy(model_path, "../deos.so", 100);
+	// 在实际使用时，需要解密模型才能加载和使用
+	decryptModel(encryptedModelFile, decryptedModelFile, password);  // 解密模型文件
+
         g_start = get_ms();
 	pthread_mutex_init(&buf_mtx, NULL);
 	//pthread_mutex_init(&mtx, NULL);
 	num_pthread = set_table(argv[2]);
-	memcpy(model_path, argv[1], strlen(argv[1]));
 	SUM = num_pthread;
 	ret = batch_handle(num_pthread, task_logic, NULL);
 	//task_create(&obj, task_logic, "test_argc");
