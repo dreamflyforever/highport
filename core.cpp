@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	//std::string modelFile = argv[1];
 
 	std::string encryptedModelFile = argv[1];
-	std::string decryptedModelFile = "deos.so";
+	std::string decryptedModelFile = "libdeos.so";
 
 	std::string password = "myPassword123";  // 设置加密和解密的密码
 
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	}
 
 	//memcpy(model_path, argv[1], strlen(argv[1]));
-	memcpy(model_path, "../deos.so", 100);
+	memcpy(model_path, "../libdeos.so", 100);
 	// 在实际使用时，需要解密模型才能加载和使用
 	decryptModel(encryptedModelFile, decryptedModelFile, password);  // 解密模型文件
 

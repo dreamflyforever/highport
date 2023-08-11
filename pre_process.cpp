@@ -120,7 +120,6 @@ int picture_process(const char *path, int which)
 	} else {
 		//hp_printf("success %d\n", which);
 	}
-	hp_printf("%s\n", path);
     // opencv 读取数据，resize操作，减均值， 除方差，并且转成nchw
     cv::Mat matBgrImg = cv::imread(path);
     cv::Mat matBgrRescaleImg = rescale_pad(matBgrImg, 128);
