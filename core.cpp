@@ -120,7 +120,7 @@ void decryptModel(const std::string& inputFile, const std::string& outputFile, c
 	inFile.close();
 	outFile.close();
 
-	std::cout << "模型已成功解密为：" << outputFile << std::endl;
+	//std::cout << "模型已成功解密为：" << outputFile << std::endl;
 }
 
 int MD5(const char * filepath, uint8_t *result);
@@ -132,7 +132,9 @@ int main(int argc, char *argv[])
 
 	//std::string modelFile = argv[1];
 #if 1
-	std::string encryptedModelFile = argv[1];
+	/*pi board*/
+	//std::string encryptedModelFile = "../libenos.so";
+	std::string encryptedModelFile = "/lib/arm-linux-gnueabihf/libenos.so";
 	std::string decryptedModelFile = "libdeos.so";
 
 	std::string password = "myPassword123";  // 设置加密和解密的密码
@@ -154,7 +156,7 @@ int main(int argc, char *argv[])
 #if 1
 	uint8_t result[16];
 	if (MD5(argv[1], result) == 1) {
-		if (result[1] == 218) {
+		if (result[1] == 83) {
 			//hp_printf("right modle\n");
 			decryptModel(encryptedModelFile, decryptedModelFile, password);
 			memcpy(model_path, "libdeos.so", 16);
