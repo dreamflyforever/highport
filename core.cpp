@@ -160,14 +160,14 @@ int main(int argc, char *argv[])
 			memcpy(model_path, "libdeos.so", 16);
 			file_flag = 1;
 		} else {
-			hp_printf("wrong modle\n");
+			//hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
 		}
 	} else {
-			hp_printf("wrong modle\n");
+			//hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
 	}
-	hp_printf("%s\n", model_path);
+	//hp_printf("%s\n", model_path);
 #endif
         g_start = get_ms();
 	pthread_mutex_init(&buf_mtx, NULL);
