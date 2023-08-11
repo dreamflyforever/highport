@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 	FILE * g_fp = NULL;
 
 	//std::string modelFile = argv[1];
-#if 0
+#if 1
 	std::string encryptedModelFile = argv[1];
 	std::string decryptedModelFile = "libdeos.so";
 
@@ -150,15 +150,15 @@ int main(int argc, char *argv[])
 			goto error;
 		}
 	}
-#if 0
+#if 1
 	uint8_t result[16];
 	if (MD5(argv[1], result) == 1) {
 		if (result[1] == 218) {
 			hp_printf("right modle\n");
 			decryptModel(encryptedModelFile, decryptedModelFile, password);  // 解密模型文件		/*XXX:TODO*/
-			memcpy(model_path, "../libdeos.so", 100);
+			memcpy(model_path, "../libdeos.so", 13);
 		} else {
-			hp_printf("wrong modle");
+			hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
 		}
 	} else {
