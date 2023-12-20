@@ -12,7 +12,7 @@ mkidr build; cd build; cmake ..; make ; sudo make install
 modify CMakeFileList.txt lib position
 
 ### performance
-80ms handle 1 picture(pixel 128 * 128) in raspberry4B platform
+80ms handle 1 picture(pixel 96 * 96) in raspberry4B platform
 
 ### license
 MIT by Jim

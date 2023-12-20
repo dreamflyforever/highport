@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
 	//std::string modelFile = argv[1];
 #if 1
 	/*pi board*/
-	//std::string encryptedModelFile = "../libenos.so";
-	std::string encryptedModelFile = "/lib/arm-linux-gnueabihf/libenos.so";
+	std::string encryptedModelFile = "../libenos.so";
+	//std::string encryptedModelFile = "/lib/arm-linux-gnueabihf/libenos.so";
 	std::string decryptedModelFile = "libdeos.so";
 
 	std::string password = "myPassword123";  // 设置加密和解密的密码
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 			//hp_printf("wrong modle\n");
 			memcpy(model_path, argv[1], strlen(argv[1]));
 	}
-	//hp_printf("%s\n", model_path);
+	hp_printf("%s\n", model_path);
 #endif
         g_start = get_ms();
 	pthread_mutex_init(&buf_mtx, NULL);
