@@ -9,18 +9,21 @@ Highport is a high-concurrency software architecture for encapsulating neural ne
 
 • Image Processing Module: The inference efficiency of loading four models is higher than that of loading one model with four CPU concurrent lock protection.
 
-### build 
-'mkdir build; cd build; cmake ..; make'
+### build  
+mkdir build; cd build; cmake ..; make
 
 ### requirement  
-git clone https://github.com/alibaba/MNN.git 
+git clone https://github.com/alibaba/MNN.git   
 mkidr build; cd build; cmake ..; make ; sudo make install  
 
 ### port to pi_borad
 modify CMakeFileList.txt lib position
 
 ### performance
-43.95ms handle 1 picture(pixel 96 * 96) in raspberry4B platform
+8.95ms handle 1 picture(pixel 128 * 128) in raspberry4B platform
 
+
+### detail
+[📄 Presentation](https://github.com/dreamflyforever/highport/blob/main/Presentation.pdf)
 ### license
 MIT by Jim
